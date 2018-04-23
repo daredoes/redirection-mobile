@@ -20,18 +20,32 @@ export default class RootNavigator extends React.Component {
     }
   }
 
-  switchItems = (name) => {
-    this.props.settings.urls.map((item) => {
-      if(item.name == name){
-        FileSystem.readAsStringAsync(FileSystem.documentDirectory + item.filename).then((read_item) => {
-          the_item = JSON.parse(read_item);
-          this.setState({
-              item: item,
-              items: the_item
-            });
-          });
-      }
-    });
+  switchItems = (item) => {
+    FileSystem.readAsStringAsync(FileSystem.documentDirectory + item.filename).then((read_item) => {
+      the_item = JSON.parse(read_item);
+      this.setState({
+          item: item,
+          items: the_item
+        });
+      });
+  }
+
+  reload = (item, download) => {
+    if(download){
+      FileSystem.downloadAsync(item.url + "/data.json", FileSystem.documentDirectory + item.filename).then((fileHeader) => {
+        if(fileHeader.status != 200){
+          console.log("Failed");
+          console.log(fileHeader);
+        }
+        else{
+          this.switchItems(item);
+        }
+      });
+    }
+    else{
+      this.switchItems(item);
+    }
+
   }
 
   componentDidMount() {
@@ -43,7 +57,7 @@ export default class RootNavigator extends React.Component {
   }
 
   render() {
-    return <this.props.navigator screenProps={{settings: this.props.settings, item: this.state.item, items: this.state.items, switchItem: this.switchItems}}/>;
+    return <this.props.navigator screenProps={{settings: this.props.settings, item: this.state.item, items: this.state.items, switchItem: this.switchItems, reload: this.reload}}/>;
   }
 
   _registerForPushNotifications() {

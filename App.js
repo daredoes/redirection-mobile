@@ -35,22 +35,27 @@ const RootStackNavigator = StackNavigator(
   }
 );
 
-downloadFiles = (settings) => {
-  settings.urls.map((item) => {
-    FileSystem.downloadAsync(item.url + "/data.json", FileSystem.documentDirectory + item.filename).then((fileHeader) => {
-      if(fileHeader.status != 200){
-        console.log("Failed");
-        console.log(fileHeader);
-      }
-    });
-  });
-}
+
 
 export default class App extends React.Component {
   state = {
     isLoadingComplete: false,
     navigator: RootStackNavigator
   };
+
+  downloadFiles = (settings) => {
+    if(!settings){
+      settings = this.state.settings;
+    }
+    settings.urls.map((item) => {
+      FileSystem.downloadAsync(item.url + "/data.json", FileSystem.documentDirectory + item.filename).then((fileHeader) => {
+        if(fileHeader.status != 200){
+          console.log("Failed");
+          console.log(fileHeader);
+        }
+      });
+    });
+  }
 
 
   render() {
@@ -77,7 +82,7 @@ export default class App extends React.Component {
       if(item.exists){
         FileSystem.readAsStringAsync(FileSystem.documentDirectory + "settings.json").then((item) => {
           the_settings = JSON.parse(item);
-          downloadFiles(the_settings);
+          this.downloadFiles(the_settings);
           this.setState({
               settings: the_settings
             });
@@ -86,12 +91,13 @@ export default class App extends React.Component {
       }
       else {
         FileSystem.writeAsStringAsync(FileSystem.documentDirectory + "settings.json", JSON.stringify(defaultSettings, null, 4));
-        downloadFiles(defaultSettings);
+        this.downloadFiles(defaultSettings);
         this.setState({
             settings: defaultSettings
           });
       }
     });
+
     return Promise.all([
       Asset.loadAsync([
         require('./assets/images/robot-dev.png'),
@@ -114,6 +120,7 @@ export default class App extends React.Component {
   };
 
   _handleFinishLoading = () => {
+
     this.setState({ isLoadingComplete: true });
   };
 }

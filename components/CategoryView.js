@@ -1,11 +1,30 @@
 import React from 'react';
-import { Text, View, ScrollView, TouchableOpacity, TouchableHighlight, Button, StyleSheet } from 'react-native';
+import { Text, View, ScrollView, TouchableOpacity, TouchableHighlight, Button, StyleSheet, Switch } from 'react-native';
 import Category from './Category';
+import Item from "./Item";
 import {Constants} from 'expo';
 
 export default class CategoryView extends React.Component {
   constructor(props){
     super(props);
+    this.state = {
+      data: [],
+      active: "",
+      mode: "copy"
+    }
+  }
+
+  setData = (key) => {
+    this.setState({
+      data: this.props.items[key],
+      active: key
+    });
+  }
+
+  switchModes = () => {
+    this.setState({
+      mode: this.state.mode == "copy" ? "visit" : "copy"
+    });
   }
 
   render() {
@@ -19,22 +38,30 @@ export default class CategoryView extends React.Component {
       </TouchableHighlight>
       <Text style={styles.siteName}>{this.props.item.name ? this.props.item.name : "Loading..."}</Text>
       <TouchableHighlight style={styles.backButton} onPress={() => {
-        this.props.navigate("Settings");
+        this.props.reload(this.props.item, true);
       }}>
         <Text style={styles.backButtonText}>Reload</Text>
       </TouchableHighlight>
     </View>
-    { this.props.item.name ? <ScrollView style={styles.scrollBox}>
+    { this.props.item.name ? <ScrollView horizontal={true} style={styles.horizontalScrollBox}>
       {Object.keys(this.props.items).map((item) =>
-        <Category title={item} items={this.props.items[item]} key={item} url={this.props.item.url}/>
+        <Button color={this.state.active == item ? "blue" : "cyan"} key={item} title={item} onPress={() => {
+          this.setData(item);
+
+        }}/>
+      )}
+      </ScrollView> : <View style={styles.scrollBox}><Text style={{textAlign: "center", justifyContent: "center"}}>Loading...</Text></View> }
+    { this.props.item.name ? <ScrollView style={styles.scrollBox}>
+      {this.state.data.map((item) =>
+        <Item style={{ flex: 1 }} state={this.state.mode} rootURL={this.props.item.url} key={item.title} {...item} />
       )}
       </ScrollView> : <View style={styles.scrollBox}><Text style={{textAlign: "center", justifyContent: "center"}}>Loading...</Text></View> }
       <View style={{ bottom: 0, height: 50, backgroundColor: 'grey', flexDirection: 'row'}}>
         <View style={{ flex: 1}}/>
         <View style={styles.toggleButton}>
           <Text style={styles.toggleText}>Copy</Text>
-          <Button style={{flex: 1}} title="Toggle" onPress={() => {}} />
-          <Text style={styles.toggleText}>Copy</Text>
+          <Switch style={styles.toggleSwitch} value={this.state.mode == "copy" ? false : true} onValueChange={this.switchModes} />
+          <Text style={styles.toggleText}>Visit</Text>
         </View>
         <View style={{ flex: 1}}/>
       </View>
@@ -74,6 +101,14 @@ var styles = StyleSheet.create({
   },
 
   scrollBox: {
-    height: 475
+    height: 425
+  },
+
+  horizontalScrollBox: {
+    height: 50
+  },
+
+  toggleSwitch: {
+    flex: 1
   }
 });

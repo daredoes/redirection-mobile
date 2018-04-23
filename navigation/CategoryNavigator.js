@@ -22,6 +22,6 @@ export default class CategoryNavigator extends React.Component {
   }
 
   render() {
-    return <CategoryView item={this.props.screenProps.item} items={this.props.screenProps.items} navigate={this.props.navigation.navigate}/>;
+    return <CategoryView reload={this.props.screenProps.reload} item={this.props.screenProps.item} items={this.props.screenProps.items} navigate={this.props.navigation.navigate}/>;
   }
 }

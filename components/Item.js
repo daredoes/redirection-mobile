@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, ScrollView, TouchableOpacity, Clipboard, Alert } from 'react-native';
+import { Text, View, ScrollView, TouchableOpacity, Clipboard, Alert, Platform, ToastAndroid } from 'react-native';
 import {WebBrowser} from 'expo';
 
 export default class Item extends React.Component {
@@ -8,7 +8,19 @@ export default class Item extends React.Component {
   }
 
   onPress = () => {
-    WebBrowser.openBrowserAsync(this.props.url);
+    if(this.props.state == "copy"){
+      this.copy();
+    }
+    else{
+      WebBrowser.openBrowserAsync(this.props.url);
+    }
+  }
+
+  copy = () => {
+    Clipboard.setString(`${this.props.rootURL + this.props.path}`);
+    if(Platform.OS == "android"){
+      ToastAndroid.show(`Copied ${this.props.rootURL + this.props.path} to clipboard.`, ToastAndroid.SHORT);
+    }
   }
 
   onLongPress = () => {
